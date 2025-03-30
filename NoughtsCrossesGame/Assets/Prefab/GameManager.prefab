@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5163321985891900048}
   - component: {fileID: 8012503662563221007}
+  - component: {fileID: 7578144479734036277}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -47,3 +48,20 @@ MonoBehaviour:
   board: {fileID: 0}
   prefabX: {fileID: 8615801610135330598, guid: 71910244519315f4885a5ebc4d65df0d, type: 3}
   prefabO: {fileID: 4145389304511834114, guid: 6c46c8859a199cc4391701723e92d2b1, type: 3}
+  aiController: {fileID: 7578144479734036277}
+--- !u!114 &7578144479734036277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6340169211778865127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d690193a515d994cb5246e57992f093, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  aiOccupant: 2
+  opponentOccupant: 1
+  maxDepth: 3
+  randomFactor: 0.5

@@ -4,137 +4,160 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour
 {
     [Header("References")]
-    public Board board;                  // 指向 Board 脚本
-    public GameObject prefabX;           // X 棋子模型
-    public GameObject prefabO;           // O 棋子模型
+    public Board board;                  // 你的 Board 脚本
+    public GameObject prefabX;           // X棋子
+    public GameObject prefabO;           // O棋子
+    public AIController aiController;    // AI 脚本(同场景物体上)
 
-    private bool isXTurn = true;         // 是否轮到 X
+    // 这里假设: 玩家使用 X, AI使用 O, 并且 X先手
+    private bool isPlayerTurn = true;    // 是否轮到玩家
 
     private void OnEnable()
     {
         if (board != null)
-        {
-            // 订阅 Board 的点击事件
-            board.OnCellClicked += HandleCellClicked;
-        }
+            board.OnCellClicked += HandleCellClicked;  // 订阅点击事件
     }
 
     private void OnDisable()
     {
         if (board != null)
-        {
             board.OnCellClicked -= HandleCellClicked;
-        }
     }
 
     private void Start()
     {
-        // 如果需要初始化逻辑可以放这里
-        // 比如：清空所有格子的 occupant
-        if (board != null && board.allCells != null)
+        // 初始化所有格子 occupant = None
+        foreach (var cell in board.allCells)
         {
-            foreach (var cell in board.allCells)
-            {
-                cell.occupant = CellOccupant.None;
-            }
+            cell.occupant = CellOccupant.None;
+        }
+
+        // 设置AI脚本的身份: 如果玩家是X, 那么 AI是O
+        // 当然你也可以在 AIController 里直接写死
+        if (aiController != null)
+        {
+            aiController.aiOccupant = CellOccupant.O;
+            aiController.opponentOccupant = CellOccupant.X;
         }
     }
 
-    // 当某个格子被点击
+    /// <summary>
+    /// 玩家点击某个格子时触发
+    /// </summary>
     private void HandleCellClicked(GridCell cell)
     {
-        // 1. 如果该格子已被占用，则无法落子
-        if (cell.IsOccupied)
+        if (!isPlayerTurn)
         {
-            Debug.Log($"格子({cell.cellIndex.x},{cell.cellIndex.y}) 已有棋子，无法落子");
+            // 如果现在是AI回合，忽略玩家点击(或者给提示)
             return;
         }
 
-        // 2. 根据当前轮次，给该格子记录 occupant = X 或 O
-        CellOccupant occupantType = isXTurn ? CellOccupant.X : CellOccupant.O;
-        cell.occupant = occupantType;
-
-        // 3. 在格子的位置生成对应棋子
-        Vector3 spawnPos = cell.transform.position;
-        GameObject piecePrefab = isXTurn ? prefabX : prefabO;
-        Instantiate(piecePrefab, spawnPos, Quaternion.identity);
-
-        // 4. 检查胜负
-        if (CheckWin(occupantType))
+        // 如果该格子已被占用
+        if (cell.occupant != CellOccupant.None)
         {
-            Debug.Log(occupantType + " 获胜！");
-            // TODO: 这里可做游戏结束处理
+            Debug.Log("这个格子已经有子了");
             return;
         }
-        // 如果没人赢，则检查平局
+
+        // 玩家落子 (X)
+        cell.occupant = CellOccupant.X;
+        Instantiate(prefabX, cell.transform.position, Quaternion.identity);
+
+        // 检查玩家是否赢
+        if (CheckWin(CellOccupant.X))
+        {
+            Debug.Log("玩家(X)赢了");
+            // TODO: 结束游戏
+            return;
+        }
+        // 检查平局
         else if (CheckDraw())
         {
-            Debug.Log("平局！");
-            // TODO: 处理平局逻辑
+            Debug.Log("平局");
+            // TODO: 结束游戏
             return;
         }
 
-        // 5. 切换回合
-        isXTurn = !isXTurn;
+        // 切换到 AI 回合
+        isPlayerTurn = false;
+        // 调用 AI 落子(可以用协程稍微等一下模拟思考)
+        Invoke(nameof(HandleAIMove), 0.5f); 
+        // 或者你可以直接: HandleAIMove();
     }
 
-    // 用 occupantType 判断是否形成三连
-    private bool CheckWin(CellOccupant occupantType)
+    private void HandleAIMove()
     {
-        // 在 board.allCells 里查找指定 (row,col) 的 occupant
-        CellOccupant GetOccupantAt(int row, int col)
+        // 获取 AI 要下的格子
+        if (aiController == null) return;
+
+        GridCell bestCell = aiController.GetBestMove(board.allCells);
+        if (bestCell != null)
         {
-            GridCell target = board.allCells.Find(c => 
-                c.cellIndex.x == row && c.cellIndex.y == col);
-            return (target != null) ? target.occupant : CellOccupant.None;
+            // AI 落子 (O)
+            bestCell.occupant = CellOccupant.O;
+            Instantiate(prefabO, bestCell.transform.position, Quaternion.identity);
+
+            // 检查AI是否赢
+            if (CheckWin(CellOccupant.O))
+            {
+                Debug.Log("AI(O)赢了");
+                // TODO: 结束游戏
+                return;
+            }
+            else if (CheckDraw())
+            {
+                Debug.Log("平局");
+                // TODO: 结束游戏
+                return;
+            }
+        }
+        else
+        {
+            // 如果 bestCell == null, 说明棋盘满了或者其他异常
+            Debug.Log("AI 没有可下的格子, 平局?");
         }
 
-        // 检查三行三列
+        // 切回玩家回合
+        isPlayerTurn = true;
+    }
+
+    // 下面2个判定逻辑跟AIController的 CheckWin/CheckDraw 类似, 
+    // 只要保持一致即可 (或者你可以直接复用AIController那套函数)
+
+    private bool CheckWin(CellOccupant occupant)
+    {
+        CellOccupant GetOcc(int r, int c)
+        {
+            var cell = board.allCells.Find(x => x.cellIndex.x == r && x.cellIndex.y == c);
+            return (cell != null) ? cell.occupant : CellOccupant.None;
+        }
+
+        // 行列
         for (int i = 0; i < 3; i++)
         {
             // 行 i
-            if (GetOccupantAt(i, 0) == occupantType &&
-                GetOccupantAt(i, 1) == occupantType &&
-                GetOccupantAt(i, 2) == occupantType)
-            {
+            if (GetOcc(i, 0) == occupant && GetOcc(i, 1) == occupant && GetOcc(i, 2) == occupant)
                 return true;
-            }
             // 列 i
-            if (GetOccupantAt(0, i) == occupantType &&
-                GetOccupantAt(1, i) == occupantType &&
-                GetOccupantAt(2, i) == occupantType)
-            {
+            if (GetOcc(0, i) == occupant && GetOcc(1, i) == occupant && GetOcc(2, i) == occupant)
                 return true;
-            }
         }
-
-        // 检查两条对角
-        if (GetOccupantAt(0, 0) == occupantType &&
-            GetOccupantAt(1, 1) == occupantType &&
-            GetOccupantAt(2, 2) == occupantType)
-        {
+        // 对角
+        if (GetOcc(0, 0) == occupant && GetOcc(1, 1) == occupant && GetOcc(2, 2) == occupant)
             return true;
-        }
-        if (GetOccupantAt(0, 2) == occupantType &&
-            GetOccupantAt(1, 1) == occupantType &&
-            GetOccupantAt(2, 0) == occupantType)
-        {
+        if (GetOcc(0, 2) == occupant && GetOcc(1, 1) == occupant && GetOcc(2, 0) == occupant)
             return true;
-        }
 
-        // 没有三连
         return false;
     }
 
     private bool CheckDraw()
     {
-        // 如果任意格子是 None，则还没下满
-        foreach (GridCell cell in board.allCells)
+        foreach (var cell in board.allCells)
         {
             if (cell.occupant == CellOccupant.None)
                 return false;
         }
-        // 没有三连且全部格子都不为 None -> 平局
         return true;
     }
 }
