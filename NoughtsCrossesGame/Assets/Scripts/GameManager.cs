@@ -1,23 +1,20 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
     [Header("References")]
-    public Board board;
-    
-    public enum CellState { Empty, X, O }
-    private CellState[,] boardState = new CellState[3,3];
+    public Board board;                  // 指向 Board 脚本
+    public GameObject prefabX;           // X 棋子模型
+    public GameObject prefabO;           // O 棋子模型
 
-    public GameObject prefabX;
-    public GameObject prefabO;
-
-    private bool isXTurn = true;
+    private bool isXTurn = true;         // 是否轮到 X
 
     private void OnEnable()
     {
         if (board != null)
         {
-            // 改成订阅 OnCellClicked(GridCell cell)
+            // 订阅 Board 的点击事件
             board.OnCellClicked += HandleCellClicked;
         }
     }
@@ -32,88 +29,112 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i < 3; i++)
+        // 如果需要初始化逻辑可以放这里
+        // 比如：清空所有格子的 occupant
+        if (board != null && board.allCells != null)
         {
-            for (int j = 0; j < 3; j++)
+            foreach (var cell in board.allCells)
             {
-                boardState[i, j] = CellState.Empty;
+                cell.occupant = CellOccupant.None;
             }
         }
     }
 
+    // 当某个格子被点击
     private void HandleCellClicked(GridCell cell)
     {
-        // 拿到坐标
-        int row = cell.cellIndex.x;
-        int col = cell.cellIndex.y;
-
-        // 1. 检查是否可落子
-        if (boardState[row, col] != CellState.Empty)
+        // 1. 如果该格子已被占用，则无法落子
+        if (cell.IsOccupied)
         {
-            Debug.Log("该格子已经被占用！");
+            Debug.Log($"格子({cell.cellIndex.x},{cell.cellIndex.y}) 已有棋子，无法落子");
             return;
         }
 
-        // 2. 更新棋盘状态
-        boardState[row, col] = isXTurn ? CellState.X : CellState.O;
+        // 2. 根据当前轮次，给该格子记录 occupant = X 或 O
+        CellOccupant occupantType = isXTurn ? CellOccupant.X : CellOccupant.O;
+        cell.occupant = occupantType;
 
-        // 3. 根据格子的 transform.position 放置对应的 X / O 预制体
+        // 3. 在格子的位置生成对应棋子
         Vector3 spawnPos = cell.transform.position;
-        Instantiate(isXTurn ? prefabX : prefabO, spawnPos, Quaternion.identity);
+        GameObject piecePrefab = isXTurn ? prefabX : prefabO;
+        Instantiate(piecePrefab, spawnPos, Quaternion.identity);
 
         // 4. 检查胜负
-        if (CheckWin(isXTurn ? CellState.X : CellState.O))
+        if (CheckWin(occupantType))
         {
-            Debug.Log(isXTurn ? "X 胜利！" : "O 胜利！");
-            // TODO: 处理游戏结束
+            Debug.Log(occupantType + " 获胜！");
+            // TODO: 这里可做游戏结束处理
+            return;
         }
+        // 如果没人赢，则检查平局
         else if (CheckDraw())
         {
             Debug.Log("平局！");
-            // TODO: 处理游戏结束
+            // TODO: 处理平局逻辑
+            return;
         }
 
         // 5. 切换回合
         isXTurn = !isXTurn;
     }
 
-    private bool CheckWin(CellState currentPlayer)
+    // 用 occupantType 判断是否形成三连
+    private bool CheckWin(CellOccupant occupantType)
     {
-        // 行、列
-        for (int i = 0; i < 3; i++)
+        // 在 board.allCells 里查找指定 (row,col) 的 occupant
+        CellOccupant GetOccupantAt(int row, int col)
         {
-            // 行
-            if (boardState[i,0] == currentPlayer &&
-                boardState[i,1] == currentPlayer &&
-                boardState[i,2] == currentPlayer)
-                return true;
-
-            // 列
-            if (boardState[0,i] == currentPlayer &&
-                boardState[1,i] == currentPlayer &&
-                boardState[2,i] == currentPlayer)
-                return true;
+            GridCell target = board.allCells.Find(c => 
+                c.cellIndex.x == row && c.cellIndex.y == col);
+            return (target != null) ? target.occupant : CellOccupant.None;
         }
 
-        // 对角
-        if (boardState[0,0] == currentPlayer &&
-            boardState[1,1] == currentPlayer &&
-            boardState[2,2] == currentPlayer)
-            return true;
-        if (boardState[0,2] == currentPlayer &&
-            boardState[1,1] == currentPlayer &&
-            boardState[2,0] == currentPlayer)
-            return true;
+        // 检查三行三列
+        for (int i = 0; i < 3; i++)
+        {
+            // 行 i
+            if (GetOccupantAt(i, 0) == occupantType &&
+                GetOccupantAt(i, 1) == occupantType &&
+                GetOccupantAt(i, 2) == occupantType)
+            {
+                return true;
+            }
+            // 列 i
+            if (GetOccupantAt(0, i) == occupantType &&
+                GetOccupantAt(1, i) == occupantType &&
+                GetOccupantAt(2, i) == occupantType)
+            {
+                return true;
+            }
+        }
 
+        // 检查两条对角
+        if (GetOccupantAt(0, 0) == occupantType &&
+            GetOccupantAt(1, 1) == occupantType &&
+            GetOccupantAt(2, 2) == occupantType)
+        {
+            return true;
+        }
+        if (GetOccupantAt(0, 2) == occupantType &&
+            GetOccupantAt(1, 1) == occupantType &&
+            GetOccupantAt(2, 0) == occupantType)
+        {
+            return true;
+        }
+
+        // 没有三连
         return false;
     }
 
     private bool CheckDraw()
     {
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-                if (boardState[i,j] == CellState.Empty)
-                    return false;
+        // 如果任意格子是 None，则还没下满
+        foreach (GridCell cell in board.allCells)
+        {
+            if (cell.occupant == CellOccupant.None)
+                return false;
+        }
+        // 没有三连且全部格子都不为 None -> 平局
         return true;
     }
 }
