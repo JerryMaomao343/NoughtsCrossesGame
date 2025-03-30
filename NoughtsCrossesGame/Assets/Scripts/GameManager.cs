@@ -4,18 +4,18 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour
 {
     [Header("References")]
-    public Board board;                  // 你的 Board 脚本
-    public GameObject prefabX;           // X棋子
-    public GameObject prefabO;           // O棋子
-    public AIController aiController;    // AI 脚本(同场景物体上)
+    public Board board;                  
+    public GameObject prefabX;           
+    public GameObject prefabO;           
+    public AIController aiController;    
 
-    // 这里假设: 玩家使用 X, AI使用 O, 并且 X先手
-    private bool isPlayerTurn = true;    // 是否轮到玩家
+    //玩家使用 X, AI使用 O, 并且 X先手
+    private bool isPlayerTurn = true;
 
     private void OnEnable()
     {
         if (board != null)
-            board.OnCellClicked += HandleCellClicked;  // 订阅点击事件
+            board.OnCellClicked += HandleCellClicked;
     }
 
     private void OnDisable()
@@ -26,14 +26,13 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        // 初始化所有格子 occupant = None
+        // 初始化所有格子
         foreach (var cell in board.allCells)
         {
             cell.occupant = CellOccupant.None;
         }
 
-        // 设置AI脚本的身份: 如果玩家是X, 那么 AI是O
-        // 当然你也可以在 AIController 里直接写死
+        // 设置AI的棋子
         if (aiController != null)
         {
             aiController.aiOccupant = CellOccupant.O;
@@ -48,7 +47,7 @@ public class GameManager : MonoBehaviour
     {
         if (!isPlayerTurn)
         {
-            // 如果现在是AI回合，忽略玩家点击(或者给提示)
+            // 如果现在是AI回合，忽略玩家点击
             return;
         }
 
@@ -59,18 +58,18 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // 玩家落子 (X)
+        // 玩家有效落子，广播并生成模型
         cell.occupant = CellOccupant.X;
+        EventCenter.Instance.Broadcast(GameEvent.OnPlayerPlace);
         Instantiate(prefabX, cell.transform.position, Quaternion.identity);
 
-        // 检查玩家是否赢
+        // 检查玩家对局结果
         if (CheckWin(CellOccupant.X))
         {
             Debug.Log("玩家(X)赢了");
             // TODO: 结束游戏
             return;
         }
-        // 检查平局
         else if (CheckDraw())
         {
             Debug.Log("平局");
@@ -78,11 +77,10 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // 切换到 AI 回合
+        // 切换到AI回合并广播
         isPlayerTurn = false;
-        // 调用 AI 落子(可以用协程稍微等一下模拟思考)
+        EventCenter.Instance.Broadcast(GameEvent.OnAIRound);
         Invoke(nameof(HandleAIMove), 0.5f); 
-        // 或者你可以直接: HandleAIMove();
     }
 
     private void HandleAIMove()

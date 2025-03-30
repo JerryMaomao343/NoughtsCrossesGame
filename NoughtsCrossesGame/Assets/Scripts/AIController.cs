@@ -17,6 +17,11 @@ public class AIController : MonoBehaviour
     /// </summary>
     public GridCell GetBestMove(List<GridCell> allCells)
     {
+        // ----------------------------------------------------------------
+        // 1) 当AI准备思考、开始自己的回合，我们可以先广播 OnAIRound 事件
+        // ----------------------------------------------------------------
+        EventCenter.Instance.Broadcast(GameEvent.OnAIRound);
+
         int bestScore = int.MinValue;
         GridCell bestCell = null;
 
@@ -28,13 +33,18 @@ public class AIController : MonoBehaviour
                 emptyCells.Add(cell);
         }
 
-        // 如果有一定 randomFactor，我们可能直接抛弃 Minimax，在少量几率下纯随机落子
-        // 例如 30% 概率随机，让 AI 更“失误”
-        if (Random.value < randomFactor)
+        // 如果有一定 randomFactor，我们可能直接在少量几率下纯随机落子
+        if (Random.value < randomFactor && emptyCells.Count > 0)
         {
-            // 直接在空格子中任选一个
             int r = Random.Range(0, emptyCells.Count);
-            return emptyCells[r];
+            // 这里可以广播 OnAIPlace，告诉大家 AI 准备放子(不过AI实际还没return)
+            GridCell randomCell = emptyCells[r];
+
+            // 也可以在“决定完bestCell”后，再统一广播
+            EventCenter.Instance.Broadcast(
+                GameEvent.OnAIPlace, randomCell.cellIndex.x, randomCell.cellIndex.y);
+
+            return randomCell;
         }
 
         // 否则执行 Minimax
@@ -55,6 +65,17 @@ public class AIController : MonoBehaviour
                 bestCell = cell;
             }
         }
+
+        // ----------------------------------------------------------------
+        // 2) 当AI最终确定了最优格子bestCell，就广播 OnAIPlace 事件
+        //    附带落子坐标以供其它脚本使用
+        // ----------------------------------------------------------------
+        if (bestCell != null)
+        {
+            EventCenter.Instance.Broadcast(
+                GameEvent.OnAIPlace, bestCell.cellIndex.x, bestCell.cellIndex.y);
+        }
+
         return bestCell;
     }
 
@@ -65,7 +86,7 @@ public class AIController : MonoBehaviour
         if (CheckWin(allCells, opponentOccupant)) return -10 + depth;
         if (CheckDraw(allCells)) return 0;
 
-        // 2. 如果超出最大搜索深度，就用“局面评估函数(Evaluation)”来返回大概分数
+        // 2. 如果超出最大搜索深度，就用局面评估函数
         if (depth >= maxDepth)
         {
             return EvaluateBoard(allCells);
@@ -106,34 +127,22 @@ public class AIController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 分数评估方法
-    /// </summary>
-    /// <param name="allCells">所有落子</param>
-    /// <returns>决策得分</returns>
+    /// <summary>分数评估</summary>
     private int EvaluateBoard(List<GridCell> allCells)
     {
-        // +3 分: AI 有两连且第三格为空
-        // +1 分: AI 有1个子
-        // -3 分: 对手有两连且第三格为空
-        // -1 分: 对手有1个子
-
         int score = 0;
-
-        // 把 3行+3列+2对角都检查 看双方的子数
         int[,] lines = new int[,]
         {
-            {0,0, 0,1, 0,2}, // row0
-            {1,0, 1,1, 1,2}, // row1
-            {2,0, 2,1, 2,2}, // row2
-            {0,0, 1,0, 2,0}, // col0
-            {0,1, 1,1, 2,1}, // col1
-            {0,2, 1,2, 2,2}, // col2
-            {0,0, 1,1, 2,2}, // diag1
-            {0,2, 1,1, 2,0}, // diag2
+            {0,0, 0,1, 0,2},
+            {1,0, 1,1, 1,2},
+            {2,0, 2,1, 2,2},
+            {0,0, 1,0, 2,0},
+            {0,1, 1,1, 2,1},
+            {0,2, 1,2, 2,2},
+            {0,0, 1,1, 2,2},
+            {0,2, 1,1, 2,0},
         };
 
-        // 辅助函数
         CellOccupant GetOcc(int r, int c)
         {
             GridCell cell = allCells.Find(x => x.cellIndex.x == r && x.cellIndex.y == c);
@@ -150,7 +159,6 @@ public class AIController : MonoBehaviour
             CellOccupant o2 = GetOcc(r2, c2);
             CellOccupant o3 = GetOcc(r3, c3);
 
-            // 统计这一条线 AI 的子数, 对手的子数
             int aiCount = 0, oppCount = 0;
             if (o1 == aiOccupant) aiCount++;
             if (o2 == aiOccupant) aiCount++;
@@ -159,19 +167,14 @@ public class AIController : MonoBehaviour
             if (o2 == opponentOccupant) oppCount++;
             if (o3 == opponentOccupant) oppCount++;
 
-            
-            
-            //决策得分评估
-            // 2 连 + 1 空 = +3 分；
-            // 1 连 = +1 分
-            // 如果一条线上同时包含AI和对手的子, 不加分
+            // 如果一条线上同时含有AI和对手的子，不加分
             if (aiCount > 0 && oppCount > 0) continue;
-            
-            //AI计分
+
+            // AI计分
             if (aiCount == 2) score += 3;
             else if (aiCount == 1) score += 1;
-            
-            //对手计分
+
+            // 对手计分
             if (oppCount == 2) score -= 3;
             else if (oppCount == 1) score -= 1;
         }
@@ -179,36 +182,24 @@ public class AIController : MonoBehaviour
         return score;
     }
 
-    /// <summary>
-    /// 检查是否胜利
-    /// </summary>
-    /// <param name="allCells">所有落子</param>
-    /// <param name="occupant">玩家对手</param>
-    /// <returns></returns>
     private bool CheckWin(List<GridCell> allCells, CellOccupant occupant)
     {
-        // 行列
         for (int i = 0; i < 3; i++)
         {
-            if (GetOcc(allCells, i, 0) == occupant && 
-                GetOcc(allCells, i, 1) == occupant && 
-                GetOcc(allCells, i, 2) == occupant)
-                return true;
+            if (GetOcc(allCells, i,0) == occupant && 
+                GetOcc(allCells, i,1) == occupant && 
+                GetOcc(allCells, i,2) == occupant) return true;
 
-            if (GetOcc(allCells, 0, i) == occupant &&
-                GetOcc(allCells, 1, i) == occupant &&
-                GetOcc(allCells, 2, i) == occupant)
-                return true;
+            if (GetOcc(allCells, 0,i) == occupant &&
+                GetOcc(allCells, 1,i) == occupant &&
+                GetOcc(allCells, 2,i) == occupant) return true;
         }
-        // 对角
-        if (GetOcc(allCells, 0, 0) == occupant &&
-            GetOcc(allCells, 1, 1) == occupant &&
-            GetOcc(allCells, 2, 2) == occupant)
-            return true;
-        if (GetOcc(allCells, 0, 2) == occupant &&
-            GetOcc(allCells, 1, 1) == occupant &&
-            GetOcc(allCells, 2, 0) == occupant)
-            return true;
+        if (GetOcc(allCells, 0,0) == occupant &&
+            GetOcc(allCells, 1,1) == occupant &&
+            GetOcc(allCells, 2,2) == occupant) return true;
+        if (GetOcc(allCells, 0,2) == occupant &&
+            GetOcc(allCells, 1,1) == occupant &&
+            GetOcc(allCells, 2,0) == occupant) return true;
 
         return false;
     }
@@ -217,7 +208,8 @@ public class AIController : MonoBehaviour
     {
         foreach (var cell in allCells)
         {
-            if (cell.occupant == CellOccupant.None) return false;
+            if (cell.occupant == CellOccupant.None)
+                return false;
         }
         return true;
     }

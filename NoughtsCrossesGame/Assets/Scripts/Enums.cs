@@ -2,16 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enums
-{
-    /// <summary>
-    /// 游戏事件
-    /// </summary>
-    public enum GameEvent
-    {
-        OnPlayerSpawn,
-        OnPlayerDeath,
-        OnLevelComplete,
-    }
-
+/// <summary>
+/// 游戏事件
+/// </summary>
+public enum GameEvent
+{ 
+    OnStartGame, //开始游戏 
+    OnEndGame, //结束游戏
+    OnPlayerRound, //开始玩家回合
+    OnAIRound, //开始AI回合
+    OnPlayerPlace, //玩家点击落子
+    OnAIPlace, //AI落子
 }
+
+

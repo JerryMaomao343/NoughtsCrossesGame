@@ -1,18 +1,40 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class EventCenter : MonoBehaviour
+public class EventCenter
 {
-    // Start is called before the first frame update
-    void Start()
+    static EventCenter instance;
+    public static EventCenter Instance 
     {
-        
+        get
+        {
+            if (instance == null) instance = new EventCenter();
+            return instance;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    Dictionary<GameEvent, Action<object[]>> eventDict = new Dictionary<GameEvent, Action<object[]>>();
+
+    public void AddListener(GameEvent evt, Action<object[]> callback)
     {
-        
+        if (!eventDict.ContainsKey(evt))
+            eventDict[evt] = null;
+        eventDict[evt] += callback;
+    }
+
+    public void RemoveListener(GameEvent evt, Action<object[]> callback)
+    {
+        if (eventDict.ContainsKey(evt))
+        {
+            eventDict[evt] -= callback;
+            if (eventDict[evt] == null)
+                eventDict.Remove(evt);
+        }
+    }
+
+    public void Broadcast(GameEvent evt, params object[] args)
+    {
+        if (eventDict.ContainsKey(evt))
+            eventDict[evt]?.Invoke(args);
     }
 }

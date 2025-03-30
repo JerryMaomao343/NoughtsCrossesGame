@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5163321985891900048}
   - component: {fileID: 8012503662563221007}
   - component: {fileID: 7578144479734036277}
+  - component: {fileID: 3449031987420877404}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -65,3 +66,15 @@ MonoBehaviour:
   opponentOccupant: 1
   maxDepth: 3
   randomFactor: 0.5
+--- !u!114 &3449031987420877404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6340169211778865127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55c41e54727975148a9aa5d000f47d73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
