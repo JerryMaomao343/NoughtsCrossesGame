@@ -49,6 +49,7 @@ public class StartMenuManager : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
+        GameManager.Instance.NewMatch();
         EventCenter.Instance.Broadcast(GameEvent.OnStartGame);
         // TODO:场景切换、初始化数据等操作
     }
