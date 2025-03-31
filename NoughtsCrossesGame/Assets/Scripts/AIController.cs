@@ -7,21 +7,16 @@ public class AIController : MonoBehaviour
     public CellOccupant opponentOccupant = CellOccupant.X;
 
     [Range(1, 9)]
-    public int maxDepth = 9; // 难度因子: 越小 -> 越容易失误 (因为只看浅层)
+    public int maxDepth = 9; 
 
     [Range(0f, 1f)]
-    public float randomFactor = 0f; // 难度因子: 越大 -> 越可能随机选择非最优解
+    public float randomFactor = 0f;
 
     /// <summary>
     /// 获取 AI 的最佳落子(返回要下的格子)
     /// </summary>
     public GridCell GetBestMove(List<GridCell> allCells)
     {
-        // ----------------------------------------------------------------
-        // 1) 当AI准备思考、开始自己的回合，我们可以先广播 OnAIRound 事件
-        // ----------------------------------------------------------------
-        EventCenter.Instance.Broadcast(GameEvent.OnAIRound);
-
         int bestScore = int.MinValue;
         GridCell bestCell = null;
 
@@ -37,12 +32,7 @@ public class AIController : MonoBehaviour
         if (Random.value < randomFactor && emptyCells.Count > 0)
         {
             int r = Random.Range(0, emptyCells.Count);
-            // 这里可以广播 OnAIPlace，告诉大家 AI 准备放子(不过AI实际还没return)
             GridCell randomCell = emptyCells[r];
-
-            // 也可以在“决定完bestCell”后，再统一广播
-            EventCenter.Instance.Broadcast(
-                GameEvent.OnAIPlace, randomCell.cellIndex.x, randomCell.cellIndex.y);
 
             return randomCell;
         }
@@ -64,16 +54,6 @@ public class AIController : MonoBehaviour
                 bestScore = score;
                 bestCell = cell;
             }
-        }
-
-        // ----------------------------------------------------------------
-        // 2) 当AI最终确定了最优格子bestCell，就广播 OnAIPlace 事件
-        //    附带落子坐标以供其它脚本使用
-        // ----------------------------------------------------------------
-        if (bestCell != null)
-        {
-            EventCenter.Instance.Broadcast(
-                GameEvent.OnAIPlace, bestCell.cellIndex.x, bestCell.cellIndex.y);
         }
 
         return bestCell;

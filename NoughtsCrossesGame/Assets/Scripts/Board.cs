@@ -22,6 +22,11 @@ public class Board : MonoBehaviour
 
     void Update()
     {
+        if (!GameManager.Instance.isPlayerTurn && lastHighlightedObj != null)
+        {
+            RestoreOriginalMaterial(lastHighlightedObj);
+            return;
+        }
         if (lastHighlightedObj != null)
         {
             RestoreOriginalMaterial(lastHighlightedObj);
