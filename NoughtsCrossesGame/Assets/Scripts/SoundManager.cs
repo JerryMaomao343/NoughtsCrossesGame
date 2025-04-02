@@ -83,7 +83,7 @@ public class SoundManager : MonoBehaviour
     private void OnEndGame(object[] args)
     {
         PlaySound(endGameClip);
-        _camera.DOShakePosition(0.1f, 0.05f);
+        _camera.DOShakePosition(0.1f, 0.06f);
     }
 
     private void OnPlayerPlace(object[] args)

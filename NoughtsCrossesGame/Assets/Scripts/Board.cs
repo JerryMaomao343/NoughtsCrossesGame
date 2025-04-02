@@ -23,23 +23,38 @@ public class Board : MonoBehaviour
             allCells.AddRange(GetComponentsInChildren<GridCell>());
     }
 
+    private void OnEnable()
+    {
+        EventCenter.Instance.AddListener(GameEvent.OnEndGame,ResetPause);
+    }
+
+    private void OnDisable()
+    {
+        EventCenter.Instance.RemoveListener(GameEvent.OnEndGame,ResetPause);
+    }
+
     void Update()
     {
-        Debug.Log(GameManager.Instance.isOnGame);
-        if (GameManager.Instance.isOnGame && Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (!_isPaused)
+            if (!_isPaused&&GameManager.Instance.isOnGame)
             {
                 EventCenter.Instance.Broadcast(GameEvent.EnterPause);
                 _isPaused = true;
             }
-            else
+            else if (_isPaused && !GameManager.Instance.isOnGame)
             {
                 EventCenter.Instance.Broadcast(GameEvent.ExitPause);
                 _isPaused = false;
             }
         }
 
+        if (_isPaused)
+        {
+            RestoreOriginalMaterial(lastHighlightedObj);
+            return;
+        }
+        
         if (!GameManager.Instance.isPlayerTurn && lastHighlightedObj != null)
         {
             RestoreOriginalMaterial(lastHighlightedObj);
@@ -105,5 +120,10 @@ public class Board : MonoBehaviour
         {
             rend.material = lastOriginalMat;
         }
+    }
+
+    void ResetPause(object[] args)
+    {
+        _isPaused = false;
     }
 }

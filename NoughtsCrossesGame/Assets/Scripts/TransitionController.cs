@@ -14,9 +14,9 @@ public class TransitionController : MonoBehaviour
     private Vector3 _pauseBoardStartRotate;
     private Vector3 _startBoardEndPos = new Vector3(12.4f, 4.2f, -4.72f);
     private Vector3 _startBoardEndRotate = new Vector3(0, 0, -90f);
-    private Vector3 _pauseBoardEndRotate = new Vector3(0, 0, 0f);
+    private Vector3 _pauseBoardEndRotate = new Vector3(-35, 0, 0);
     private Vector3 _chessBoardEndPos = new Vector3(0, 0.07f, 0);
-    private Vector3 _pauseBoardEndPos = new Vector3(0, 1.56f, 0);
+    private Vector3 _pauseBoardEndPos = new Vector3(-0.3f,-0.22f, -5.3f);
     private void OnEnable()
     {
         _startBoardStartPos = startBoard.transform.position;
@@ -29,6 +29,7 @@ public class TransitionController : MonoBehaviour
         EventCenter.Instance.AddListener(GameEvent.OnEndGame, OnGameEnd);
         EventCenter.Instance.AddListener(GameEvent.EnterPause, OnPauseShow);
         EventCenter.Instance.AddListener(GameEvent.ExitPause, OnPauseHide);
+        //EventCenter.Instance.AddListener(GameEvent.ReturnToMainMenu, OnPauseHide);
     }
 
     private void OnDisable()
@@ -37,6 +38,7 @@ public class TransitionController : MonoBehaviour
         EventCenter.Instance.RemoveListener(GameEvent.OnEndGame, OnGameEnd);
         EventCenter.Instance.RemoveListener(GameEvent.EnterPause, OnPauseShow);
         EventCenter.Instance.RemoveListener(GameEvent.ExitPause, OnPauseHide);
+        //EventCenter.Instance.RemoveListener(GameEvent.ReturnToMainMenu, OnPauseHide);
     }
 
     /// <summary>
@@ -68,6 +70,13 @@ public class TransitionController : MonoBehaviour
         Debug.Log("[TransitionController] 收到 GameEnd，播放对局退出动画");
         GameManager.Instance.isOnGame = false;
         Sequence exitSequence = DOTween.Sequence();
+
+        if (!GameManager.Instance.isOnGame)
+        {
+            exitSequence.Append(pauseBoard.transform.DOMove(_pauseBoardStartPos, 0.5f));
+            exitSequence.Join(pauseBoard.transform.DOLocalRotate(_pauseBoardStartRotate, 0.5f));
+        }
+        
         //界面黑板移入
         exitSequence.Append(startBoard.transform.DOMove(_startBoardStartPos, 0.5f));
         exitSequence.Join(startBoard.transform.DOLocalRotate(_startBoardStartRotate, 0.5f));
