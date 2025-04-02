@@ -152,6 +152,8 @@ public class GameManager : MonoBehaviour
     private void OnFinishEnterAni(object[] args)
     {
         Debug.Log("进入对局动画结束 => 开始主序列");
+        UITextPanel panel = UIManager.Instance.ShowUI<UITextPanel>(Resources.Load<GameObject>("UITextPanel"), $"第{NumberToChinese(currentRound)}回合");
+        UIManager.Instance.CloseUIAfter(panel,1f);
         turnSequence.Play();
     }
     private void OnFinishExitAni(object[] args)
@@ -229,6 +231,7 @@ public class GameManager : MonoBehaviour
 
         // 建子序列
         Sequence subSeq = DOTween.Sequence();
+        UITextPanel uiTextPanel = null;
 
         //显示UI (可根据 occupantWinner 判断是谁赢)
         subSeq.AppendCallback(() =>
@@ -237,17 +240,17 @@ public class GameManager : MonoBehaviour
             if(occupantWinner == CellOccupant.X)
             {
                 Debug.Log("显示UI: 玩家胜利");
-                // ShowVictoryUI("玩家胜利");
+                uiTextPanel = UIManager.Instance.ShowUI<UITextPanel>(Resources.Load<GameObject>("UITextPanel"),"您获胜");
             }
             else if(occupantWinner == CellOccupant.O)
             {
                 Debug.Log("显示UI: AI胜利");
-                // ShowVictoryUI("AI胜利");
+                uiTextPanel = UIManager.Instance.ShowUI<UITextPanel>(Resources.Load<GameObject>("UITextPanel"),"对手获胜");
             }
             else
             {
                 Debug.Log("显示UI: 平局");
-                // ShowVictoryUI("平局");
+                uiTextPanel = UIManager.Instance.ShowUI<UITextPanel>(Resources.Load<GameObject>("UITextPanel"),"平局");
             }
         });
         //等2秒
@@ -267,15 +270,15 @@ public class GameManager : MonoBehaviour
                 TakeGoldCoin(false);
             }
         });
-        //再等1秒
-        subSeq.AppendInterval(1f);
 
         //关闭UI
         subSeq.AppendCallback(() =>
         {
             Debug.Log("关闭胜利UI");
-            // HideVictoryUI();
+            UIManager.Instance.CloseUI(uiTextPanel);
         });
+        //再等1秒
+        subSeq.AppendInterval(1f);
 
         //子序列结束 => 恢复主序列
         subSeq.OnComplete(() =>
@@ -303,7 +306,8 @@ public class GameManager : MonoBehaviour
         {
             currentRound++;
             Debug.Log($"[Step_NextRound] 开始回合 {currentRound}");
-
+            UITextPanel panel = UIManager.Instance.ShowUI<UITextPanel>(Resources.Load<GameObject>("UITextPanel"), $"第{NumberToChinese(currentRound)}回合");
+            UIManager.Instance.CloseUIAfter(panel,2f);
             // 只收回X/O, 保留金币
             ReverseReturnPieces(() =>
             {
@@ -544,4 +548,19 @@ public class GameManager : MonoBehaviour
         return true;
     }
     #endregion
+    
+    public static string NumberToChinese(int num)
+    {
+        switch (num)
+        {
+            case 1: return "一";
+            case 2: return "二";
+            case 3: return "三";
+            case 4: return "四";
+            case 5: return "五";
+            default: return num.ToString();
+        }
+    }
 }
+
+

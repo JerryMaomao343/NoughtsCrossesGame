@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7578144479734036277}
   - component: {fileID: 3449031987420877404}
   - component: {fileID: 5220703334037273778}
+  - component: {fileID: 8772226336991322043}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -117,3 +118,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startBoard: {fileID: 0}
   chessBoard: {fileID: 0}
+--- !u!114 &8772226336991322043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6340169211778865127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b32c24001db9104a8e63aa66470a40c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiParent: {fileID: 0}

@@ -1,12 +1,19 @@
+using System;
+using DG.Tweening;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
     private static UIManager instance;
-    public static UIManager Instance
+    private Transform _uiParent;
+
+    private void OnEnable()
     {
-        get
-        {
+        _uiParent = GameObject.FindWithTag("Canvas").transform;
+    }
+
+    public static UIManager Instance {
+        get {
             if (instance == null)
             {
                 instance = FindObjectOfType<UIManager>();
@@ -20,39 +27,52 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    [Header("UI Parent")]
-    // UI生成时的父对象，例如Canvas
-    public Transform uiParent;
-
-    /// <summary>
-    /// 实例化指定的UI prefab，并传递参数给其实现 IUIHandler 的脚本
-    /// </summary>
-    /// <typeparam name="T">UI面板对应的脚本类型，该脚本应实现 IUIHandler 接口</typeparam>
-    /// <param name="prefab">要生成的UI prefab</param>
-    /// <param name="param">初始化参数，可装箱传递</param>
-    /// <returns>返回实例化后的UI脚本组件</returns>
-    public T ShowUI<T>(GameObject prefab, object param = null) where T : MonoBehaviour
+    private void Awake()
     {
-        GameObject uiObj = Instantiate(prefab, uiParent);
-        T uiScript = uiObj.GetComponent<T>();
-        if (uiScript != null)
+        if (instance == null)
         {
-            IUIHandler handler = uiScript as IUIHandler;
-            if (handler != null)
-            {
-                handler.Init(param);
-            }
+            instance = this;
+            DontDestroyOnLoad(gameObject);
         }
-        return uiScript;
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
     }
 
     /// <summary>
-    /// 销毁指定的UI对象
+    /// 创建 UI 对象
     /// </summary>
-    /// <param name="uiObj">要关闭的UI对象</param>
-    public void CloseUI(GameObject uiObj)
+    public T ShowUI<T>(GameObject prefab, object param = null) where T : UIBase
     {
-        Destroy(uiObj);
+        return UIBase.Create<T>(prefab, _uiParent, param);
+    }
+
+    /// <summary>
+    /// 关闭指定的 UI 对象，调用其 UIBase.DestroySelf() 方法来进行销毁操作。
+    /// </summary>
+    /// <param name="ui">需要销毁的 UI 对象</param>
+    public void CloseUI(UIBase ui)
+    {
+        if (ui != null)
+        {
+            ui.DestroySelf();
+        }
+    }
+    
+    /// <summary>
+    /// 延迟 n 秒后关闭指定的 UI 对象
+    /// </summary>
+    /// <param name="ui">需要关闭的 UI 对象</param>
+    /// <param name="delaySeconds">延迟秒数</param>
+    public void CloseUIAfter(UIBase ui, float delaySeconds)
+    {
+        if (ui != null)
+        {
+            DOVirtual.DelayedCall(delaySeconds, () =>
+            {
+                ui.DestroySelf();
+            });
+        }
     }
 }
-
