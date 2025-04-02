@@ -223,12 +223,10 @@ public class GameManager : MonoBehaviour
 
         turnSequence.Pause();
         Invoke(nameof(HandleAIPlace), 0.5f); 
-        // AI思考0.5秒后再落子
     }
 
     private void Step_CheckVictory()
     {
-        // 如果本局结束 => occupantWinner 可能= X/O/None
         if(!_gameOver) return;
         Debug.Log($"[Step_CheckVictory] 回合{currentRound}结束, 获胜者：{occupantWinner}");
 
@@ -239,7 +237,7 @@ public class GameManager : MonoBehaviour
         Sequence subSeq = DOTween.Sequence();
         UITextPanel uiTextPanel = null;
 
-        //显示UI (可根据 occupantWinner 判断是谁赢)
+        //显示UI 
         subSeq.AppendCallback(() =>
         {
             isPlayerTurn=false; // 禁止玩家点击
