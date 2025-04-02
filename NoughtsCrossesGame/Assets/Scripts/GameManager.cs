@@ -50,7 +50,9 @@ public class GameManager : MonoBehaviour
 
     // 大队列 Sequence
     private Sequence turnSequence;
-    public bool isPlayerTurn = false;  
+    public bool isPlayerTurn = false;
+
+    public bool isOnGame;
 
     #region 单例
     private static GameManager instance;
@@ -79,6 +81,7 @@ public class GameManager : MonoBehaviour
 
         EventCenter.Instance.AddListener(GameEvent.OnFinishEnterAni, OnFinishEnterAni);
         EventCenter.Instance.AddListener(GameEvent.OnFinishExitAni, OnFinishExitAni);
+        EventCenter.Instance.AddListener(GameEvent.ReturnToMainMenu, OnClearBoard);
     }
     private void OnDisable()
     {
@@ -87,6 +90,7 @@ public class GameManager : MonoBehaviour
 
         EventCenter.Instance.RemoveListener(GameEvent.OnFinishEnterAni, OnFinishEnterAni);
         EventCenter.Instance.RemoveListener(GameEvent.OnFinishExitAni, OnFinishExitAni);
+        EventCenter.Instance.RemoveListener(GameEvent.ReturnToMainMenu, OnClearBoard);
     }
 
     private void Start()
@@ -145,6 +149,8 @@ public class GameManager : MonoBehaviour
         goldCoinIndex=0;
         for(int i=0; i<goldCoins.Count; i++)
             goldCoins[i].transform.position= goldCoinsOriginalPos[i];
+
+        isOnGame = true;
 
         BuildTurnSequence();
     }
@@ -564,6 +570,25 @@ public class GameManager : MonoBehaviour
         return true;
     }
     #endregion
+    
+    public void ClearBoard()
+    {
+        Debug.Log("触发清盘，正在收回所有棋子和金币……");
+        // 暂停主回合队列
+        turnSequence.Pause();
+
+        // 调用收回动画：收回所有棋子和金币
+        ReverseReturnAllPieces(() =>
+        {
+            NewMatch();
+            EventCenter.Instance.Broadcast(GameEvent.OnEndGame);
+        });
+    }
+    
+    private void OnClearBoard(object[] args)
+    {
+        ClearBoard();
+    }
     
     public static string NumberToChinese(int num)
     {

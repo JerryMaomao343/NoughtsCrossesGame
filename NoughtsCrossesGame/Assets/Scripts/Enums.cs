@@ -29,13 +29,18 @@ public enum GameEvent
     OnPieceHit,
     OnPieceLift,
     OnCoinLift,
-    OnCoinHit,
+    OnCoinHit, 
+    
+    ReturnToMainMenu,
+    EnterPause,
+    ExitPause
 }
 
 public enum ButtonType
 {
     Start,
-    Exit
+    Exit,
+    PauseExit
 }
 
 public enum ItemType

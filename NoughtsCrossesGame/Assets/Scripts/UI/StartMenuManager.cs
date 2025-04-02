@@ -52,7 +52,6 @@ public class StartMenuManager : MonoBehaviour
     {
         GameManager.Instance.NewMatch();
         EventCenter.Instance.Broadcast(GameEvent.OnStartGame);
-        // TODO:场景切换、初始化数据等操作
     }
 
     /// <summary>
@@ -62,5 +61,11 @@ public class StartMenuManager : MonoBehaviour
     {
         Debug.Log("退出游戏");
         Application.Quit();
+    }
+    
+    public void PauseExitGame()
+    {
+        Debug.Log("返回主界面");
+        EventCenter.Instance.Broadcast(GameEvent.ReturnToMainMenu);
     }
 }

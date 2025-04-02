@@ -43,6 +43,10 @@ public class MenuButton : MonoBehaviour
             {
                 StartMenuManager.Instance.ExitGame();
             }
+            else if (buttonType == ButtonType.PauseExit)
+            {
+                StartMenuManager.Instance.PauseExitGame();
+            }
         });
     }
 }

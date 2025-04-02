@@ -15,6 +15,8 @@ public class Board : MonoBehaviour
     // 用于记录上一次被高亮的格子对象
     private GameObject lastHighlightedObj = null;
 
+    private bool _isPaused;
+
     void Awake()
     {
         if (allCells.Count == 0)
@@ -23,6 +25,20 @@ public class Board : MonoBehaviour
 
     void Update()
     {
+        Debug.Log(GameManager.Instance.isOnGame);
+        if (GameManager.Instance.isOnGame && Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!_isPaused)
+            {
+                EventCenter.Instance.Broadcast(GameEvent.EnterPause);
+                _isPaused = true;
+            }
+            else
+            {
+                EventCenter.Instance.Broadcast(GameEvent.ExitPause);
+                _isPaused = false;
+            }
+        }
 
         if (!GameManager.Instance.isPlayerTurn && lastHighlightedObj != null)
         {

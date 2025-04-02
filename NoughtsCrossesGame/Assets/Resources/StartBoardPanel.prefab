@@ -538,7 +538,7 @@ MonoBehaviour:
   - {fileID: 4081125152018340835}
   - {fileID: 575380717120486523}
   - {fileID: 1103449938208192732}
-  currentDifficulty: 0
+  currentDifficulty: 1
 --- !u!1 &4142909315694926169
 GameObject:
   m_ObjectHideFlags: 0

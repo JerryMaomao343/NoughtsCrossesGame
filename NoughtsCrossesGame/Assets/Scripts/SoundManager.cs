@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class SoundManager : MonoBehaviour
@@ -21,7 +22,8 @@ public class SoundManager : MonoBehaviour
     public AudioClip pieceLift;
     public AudioClip coinHit;
     public AudioClip coinLift;
-
+    private Camera _camera;
+    
     private void Awake()
     {
         if (Instance == null)
@@ -33,6 +35,9 @@ public class SoundManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        
+        _camera = Camera.main;
+        
     }
 
     private void OnEnable()
@@ -72,11 +77,13 @@ public class SoundManager : MonoBehaviour
     private void OnStartGame(object[] args)
     {
         PlaySound(startGameClip);
+        _camera.DOShakePosition(0.1f, 0.05f);
     }
 
     private void OnEndGame(object[] args)
     {
         PlaySound(endGameClip);
+        _camera.DOShakePosition(0.1f, 0.05f);
     }
 
     private void OnPlayerPlace(object[] args)
@@ -111,6 +118,7 @@ public class SoundManager : MonoBehaviour
     private void OnPieceHit(object[] args)
     {
         PlaySound(pieceHit);
+        
     }
     private void OnPieceLift(object[] args)
     {
@@ -123,6 +131,7 @@ public class SoundManager : MonoBehaviour
     private void OnCoinLift(object[] args)
     {
         PlaySound(coinLift);
+        _camera.DOShakePosition(0.1f, 0.04f);
     }
 
 
