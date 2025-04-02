@@ -2740,8 +2740,12 @@ MonoBehaviour:
   aiPlaceClip: {fileID: 0}
   buttonSelect: {fileID: 8300000, guid: aa1eeb0b890ebbd4eb0be2810d439ccb, type: 3}
   buttonClick: {fileID: 8300000, guid: 84624cb337dff2844a446c4b850853c1, type: 3}
-  clickBoard: {fileID: 8300000, guid: 84624cb337dff2844a446c4b850853c1, type: 3}
+  clickBoard: {fileID: 8300000, guid: 2d7b795775df8ea4bad0d73ca3e2b1af, type: 3}
   showText: {fileID: 8300000, guid: a827750de0e4a564e82859a42914ed32, type: 3}
+  pieceHit: {fileID: 8300000, guid: 84624cb337dff2844a446c4b850853c1, type: 3}
+  pieceLift: {fileID: 8300000, guid: 2d7b795775df8ea4bad0d73ca3e2b1af, type: 3}
+  coinHit: {fileID: 8300000, guid: c05a9aa96a7ab534f80094bf04ffe047, type: 3}
+  coinLift: {fileID: 8300000, guid: f0e65741244ab3844a7291127d2a324a, type: 3}
 --- !u!4 &1904426195
 Transform:
   m_ObjectHideFlags: 0
@@ -3334,10 +3338,6 @@ PrefabInstance:
       propertyPath: goldCoins.Array.data[4]
       value: 
       objectReference: {fileID: 1399307216}
-    - target: {fileID: 8772226336991322043, guid: 9a34f6fcb197d0d4f9831bd081ef6065, type: 3}
-      propertyPath: uiParent
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

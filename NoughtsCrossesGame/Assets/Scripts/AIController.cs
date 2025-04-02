@@ -1,16 +1,26 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public class AIController : MonoBehaviour
 {
     public CellOccupant aiOccupant = CellOccupant.O;
     public CellOccupant opponentOccupant = CellOccupant.X;
+    
+    
+    [FormerlySerializedAs("_maxDepth")] [Range(1, 9)]
+    public int maxDepth = 1; 
 
-    [Range(1, 9)]
-    public int maxDepth = 9; 
+    [FormerlySerializedAs("_randomFactor")] [Range(0f, 1f)]
+    public float randomFactor = 0.1f;
 
-    [Range(0f, 1f)]
-    public float randomFactor = 0f;
+    public void ChangeDifficult(int diff)
+    {
+        maxDepth = diff;
+        randomFactor = 1.0f - 0.2f * diff;
+    }
 
     /// <summary>
     /// 获取 AI 的最佳落子(返回要下的格子)

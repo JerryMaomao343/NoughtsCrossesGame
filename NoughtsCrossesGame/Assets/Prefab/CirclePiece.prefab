@@ -79,6 +79,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arcHeight: 2
   dropTime: 1
+  itemType: 1
 --- !u!1001 &4134930454844929985
 PrefabInstance:
   m_ObjectHideFlags: 0

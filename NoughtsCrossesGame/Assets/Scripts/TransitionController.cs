@@ -61,13 +61,14 @@ public class TransitionController : MonoBehaviour
         //界面黑板移入
         exitSequence.Append(startBoard.transform.DOMove(_startBoardStartPos, 0.5f));
         exitSequence.Join(startBoard.transform.DOLocalRotate(_startBoardStartRotate, 0.5f));
+        exitSequence.AppendCallback(() => { EventCenter.Instance.Broadcast(GameEvent.OnFinishExitAni); });
         //棋盘抬升
         exitSequence.Join(chessBoard.transform.DOMove(_chessBoardStartPos,0.3f));
         exitSequence.AppendCallback(() =>
         {
             Debug.Log("[TransitionController] 对局退出动画播放完毕");
             // 退出动画结束后，广播 OnFinishExitAni
-            EventCenter.Instance.Broadcast(GameEvent.OnFinishExitAni);
         });
+        
     }
 }

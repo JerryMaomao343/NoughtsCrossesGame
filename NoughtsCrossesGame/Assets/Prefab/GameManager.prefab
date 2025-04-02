@@ -90,8 +90,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   aiOccupant: 2
   opponentOccupant: 1
-  maxDepth: 3
-  randomFactor: 0.5
+  difficulty: 1
 --- !u!114 &3449031987420877404
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,4 +129,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b32c24001db9104a8e63aa66470a40c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiParent: {fileID: 0}

@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     private int xIndex=0, oIndex=0;
 
     [Header("Coins (From Table)")]
-    public List<GameObject> goldCoins;          // 场景中摆好的金币
+    public List<GameObject> goldCoins;       
     private Vector3[] goldCoinsOriginalPos;
     private int goldCoinIndex=0;
     private List<GameObject> takenGoldCoins = new List<GameObject>();

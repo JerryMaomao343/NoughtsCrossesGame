@@ -18,6 +18,9 @@ public class SoundManager : MonoBehaviour
     public AudioClip clickBoard;
     public AudioClip showText;
     public AudioClip pieceHit;
+    public AudioClip pieceLift;
+    public AudioClip coinHit;
+    public AudioClip coinLift;
 
     private void Awake()
     {
@@ -43,6 +46,10 @@ public class SoundManager : MonoBehaviour
         EventCenter.Instance.AddListener(GameEvent.SelectBoard, OnBtnSelect);
         EventCenter.Instance.AddListener(GameEvent.ClickBoard, OnClickBoard);
         EventCenter.Instance.AddListener(GameEvent.OnShowText, OnShowText);
+        EventCenter.Instance.AddListener(GameEvent.OnPieceHit, OnPieceHit);
+        EventCenter.Instance.AddListener(GameEvent.OnPieceLift, OnPieceLift);
+        EventCenter.Instance.AddListener(GameEvent.OnCoinHit, OnCoinHit);
+        EventCenter.Instance.AddListener(GameEvent.OnCoinLift, OnCoinLift);
     }
 
     private void OnDisable()
@@ -54,6 +61,10 @@ public class SoundManager : MonoBehaviour
         EventCenter.Instance.RemoveListener(GameEvent.OnButtonClick, OnBtnClick);
         EventCenter.Instance.RemoveListener(GameEvent.SelectBoard, OnBtnSelect);
         EventCenter.Instance.RemoveListener(GameEvent.ClickBoard, OnShowText);
+        EventCenter.Instance.RemoveListener(GameEvent.OnPieceHit, OnPieceHit);
+        EventCenter.Instance.RemoveListener(GameEvent.OnPieceLift, OnPieceLift);
+        EventCenter.Instance.RemoveListener(GameEvent.OnCoinHit, OnCoinHit);
+        EventCenter.Instance.RemoveListener(GameEvent.OnCoinLift, OnCoinLift);
         
     }
 
@@ -90,19 +101,31 @@ public class SoundManager : MonoBehaviour
 
     private void OnClickBoard(object[] args)
     {
-        PlaySound(clickBoard);
+        //PlaySound(clickBoard);
     }
 
     private void OnShowText(object[] args)
     {
         PlaySound(showText);
+    }    
+    private void OnPieceHit(object[] args)
+    {
+        PlaySound(pieceHit);
     }
-    
+    private void OnPieceLift(object[] args)
+    {
+        PlaySound(pieceLift);
+    }
+    private void OnCoinHit(object[] args)
+    {
+        PlaySound(coinHit);
+    }
+    private void OnCoinLift(object[] args)
+    {
+        PlaySound(coinLift);
+    }
 
-    /// <summary>
-    /// 根据传入的 AudioClip 播放声音（使用 PlayOneShot）
-    /// </summary>
-    /// <param name="clip">要播放的 AudioClip</param>
+
     public void PlaySound(AudioClip clip)
     {
         if (audioSource != null && clip != null)

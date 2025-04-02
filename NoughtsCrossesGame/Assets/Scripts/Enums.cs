@@ -25,12 +25,23 @@ public enum GameEvent
     ClickBoard,
     
     OnShowText,
+    
+    OnPieceHit,
+    OnPieceLift,
+    OnCoinLift,
+    OnCoinHit,
 }
 
 public enum ButtonType
 {
     Start,
     Exit
+}
+
+public enum ItemType
+{
+    Coin,
+    Piece
 }
 
 

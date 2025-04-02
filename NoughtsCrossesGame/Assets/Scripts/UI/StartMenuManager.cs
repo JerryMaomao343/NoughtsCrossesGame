@@ -9,7 +9,7 @@ public class StartMenuManager : MonoBehaviour
     public List<DifficultStar> stars;
 
     [Header("Game Settings")]
-    public int currentDifficulty = 0;
+    public int currentDifficulty = 1;
 
     private void Awake()
     {
@@ -41,6 +41,7 @@ public class StartMenuManager : MonoBehaviour
     public void SetDifficulty(int difficulty)
     {
         currentDifficulty = difficulty;
+        GameManager.Instance.transform.GetComponent<AIController>().ChangeDifficult(currentDifficulty);
         Debug.Log("选中难度星星数量：" + currentDifficulty);
     }
 
