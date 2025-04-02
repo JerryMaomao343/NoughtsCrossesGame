@@ -26,6 +26,7 @@ public class DifficultStar : MonoBehaviour
     private void OnMouseEnter()
     {
         transform.DOScale(originalScale*hoverScale, hoverDuration);
+        EventCenter.Instance.Broadcast(GameEvent.OnButtonSelect);
         // 通知菜单管理器：当前悬浮的星星编号
         if (StartMenuManager.Instance != null)
         {

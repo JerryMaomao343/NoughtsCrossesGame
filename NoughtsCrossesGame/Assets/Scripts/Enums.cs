@@ -17,6 +17,14 @@ public enum GameEvent
     OnAIRound, //开始AI回合
     OnPlayerPlace, //玩家点击落子
     OnAIPlace, //AI落子
+    
+    OnButtonSelect,
+    OnButtonClick,
+    
+    SelectBoard,
+    ClickBoard,
+    
+    OnShowText,
 }
 
 public enum ButtonType

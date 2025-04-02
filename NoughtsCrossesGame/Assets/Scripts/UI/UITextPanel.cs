@@ -15,6 +15,7 @@ public class UITextPanel : UIBase
 
     public override void Init(object param)
     {
+        EventCenter.Instance.Broadcast(GameEvent.OnShowText);
         messageText.DOFade(1, 0.3f);
         GetComponent<RectTransform>().DOScale(1, 0.3f);
         if (param is string)

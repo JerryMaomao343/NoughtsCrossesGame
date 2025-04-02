@@ -20,6 +20,7 @@ public class MenuButton : MonoBehaviour
     private void OnMouseEnter()
     {
         transform.DOScale( originalScale*hoverScale, hoverDuration);
+        EventCenter.Instance.Broadcast(GameEvent.OnButtonSelect);
     }
 
     private void OnMouseExit()
@@ -29,7 +30,7 @@ public class MenuButton : MonoBehaviour
 
     private void OnMouseDown()
     {
-
+        EventCenter.Instance.Broadcast(GameEvent.OnButtonClick);
         transform.DOScale(originalScale * clickScale, clickDuration).OnComplete(() =>
         {
             transform.DOScale(originalScale *hoverScale, clickDuration);

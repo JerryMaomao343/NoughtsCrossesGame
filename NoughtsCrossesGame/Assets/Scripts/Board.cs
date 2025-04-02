@@ -5,14 +5,15 @@ using UnityEngine;
 public class Board : MonoBehaviour
 {
     public event Action<GridCell> OnCellClicked;
-    public List<GridCell> allCells = new List<GridCell>();
-    public LayerMask boardLayer;
+    public List<GridCell> allCells = new List<GridCell>();  // 9个格子
+    public LayerMask boardLayer;       // 只检测格子所在的 Layer
     public float raycastDistance = 100f;
-    public Material highlightEmpty;
+    public Material highlightEmpty;  
     public Material highlightOccupied;
 
     Material lastOriginalMat;
-    GameObject lastHighlightedObj;
+    // 用于记录上一次被高亮的格子对象
+    private GameObject lastHighlightedObj = null;
 
     void Awake()
     {
@@ -22,15 +23,17 @@ public class Board : MonoBehaviour
 
     void Update()
     {
+
         if (!GameManager.Instance.isPlayerTurn && lastHighlightedObj != null)
         {
             RestoreOriginalMaterial(lastHighlightedObj);
             return;
         }
+
         if (lastHighlightedObj != null)
         {
             RestoreOriginalMaterial(lastHighlightedObj);
-            lastHighlightedObj = null;
+            //lastHighlightedObj = null;
         }
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -41,10 +44,12 @@ public class Board : MonoBehaviour
             if (cell != null)
             {
                 HighlightCell(hitObj, cell);
+                // 更新记录，只在当前高亮对象改变时触发事件
                 lastHighlightedObj = hitObj;
 
                 if (Input.GetMouseButtonDown(0))
                 {
+                    EventCenter.Instance.Broadcast(GameEvent.ClickBoard);
                     OnCellClicked?.Invoke(cell);
                 }
             }
@@ -53,14 +58,27 @@ public class Board : MonoBehaviour
 
     void HighlightCell(GameObject cellObj, GridCell cell)
     {
+        // 如果上一次记录的对象为空，或者不同于当前对象，则触发选中事件
+        if (lastHighlightedObj == null || lastHighlightedObj != cellObj)
+        {
+            Debug.Log("select");
+            EventCenter.Instance.Broadcast(GameEvent.SelectBoard);
+        }
         Renderer rend = cellObj.GetComponent<Renderer>();
         if (rend != null)
         {
+            // 记录原材质以便恢复
             lastOriginalMat = rend.material;
-            if (!cell.IsOccupied && highlightEmpty)
+            
+            // 根据格子的占用情况设置高亮材质
+            if (!cell.IsOccupied && highlightEmpty != null)
+            {
                 rend.material = highlightEmpty;
-            else if (cell.IsOccupied && highlightOccupied)
+            }
+            else if (cell.IsOccupied && highlightOccupied != null)
+            {
                 rend.material = highlightOccupied;
+            }
         }
     }
 
@@ -68,6 +86,8 @@ public class Board : MonoBehaviour
     {
         Renderer rend = cellObj.GetComponent<Renderer>();
         if (rend != null && lastOriginalMat != null)
+        {
             rend.material = lastOriginalMat;
+        }
     }
 }

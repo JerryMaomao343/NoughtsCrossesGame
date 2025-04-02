@@ -297,6 +297,23 @@ public class GameManager : MonoBehaviour
         {
             _matchOver=true;
             Debug.Log("[Step_NextRound] 整场结束");
+            string result = "";
+            if (playerWins>aiWins)
+            {
+                result = "您获胜了";
+            }
+            else if (playerWins<aiWins)
+            {
+                result = "您失败了";
+            }
+            else
+            {
+                result = "平局";
+            }
+            
+            
+            UITextPanel panel = UIManager.Instance.ShowUI<UITextPanel>(Resources.Load<GameObject>("UITextPanel"), $"游戏结束，{result}");
+            UIManager.Instance.CloseUIAfter(panel,2f);
             ReverseReturnAllPieces(() =>
             {
                 EventCenter.Instance.Broadcast(GameEvent.OnEndGame);
@@ -314,7 +331,6 @@ public class GameManager : MonoBehaviour
                 placedPieces.Clear();
                 xIndex=0; 
                 oIndex=0;
-                // occupant=none
                 foreach(var c in board.allCells)
                     c.occupant=CellOccupant.None;
                 _gameOver=false;

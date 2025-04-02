@@ -58,7 +58,7 @@ public class TransitionController : MonoBehaviour
 
         Sequence exitSequence = DOTween.Sequence();
         exitSequence.AppendInterval(1.0f);
-        //界面黑板移出
+        //界面黑板移入
         exitSequence.Append(startBoard.transform.DOMove(_startBoardStartPos, 0.5f));
         exitSequence.Join(startBoard.transform.DOLocalRotate(_startBoardStartRotate, 0.5f));
         //棋盘抬升
