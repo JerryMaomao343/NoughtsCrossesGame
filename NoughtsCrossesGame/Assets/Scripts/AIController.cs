@@ -38,7 +38,7 @@ public class AIController : MonoBehaviour
                 emptyCells.Add(cell);
         }
 
-        // 如果有一定 randomFactor，我们可能直接在少量几率下纯随机落子
+        //概率下纯随机落子
         if (Random.value < randomFactor && emptyCells.Count > 0)
         {
             int r = Random.Range(0, emptyCells.Count);
@@ -71,18 +71,18 @@ public class AIController : MonoBehaviour
 
     private int Minimax(List<GridCell> allCells, int depth, bool isAiTurn)
     {
-        // 1. 检查胜负或平局
+        // 检查胜负或平局
         if (CheckWin(allCells, aiOccupant)) return +10 - depth;
         if (CheckWin(allCells, opponentOccupant)) return -10 + depth;
         if (CheckDraw(allCells)) return 0;
 
-        // 2. 如果超出最大搜索深度，就用局面评估函数
+        // 如果超出最大搜索深度，就用局面评估函数
         if (depth >= maxDepth)
         {
             return EvaluateBoard(allCells);
         }
 
-        // 3. 继续搜索
+        // 继续搜索
         if (isAiTurn)
         {
             int bestScore = int.MinValue;
