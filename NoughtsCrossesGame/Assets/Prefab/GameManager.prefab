@@ -61,10 +61,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  afterPlayerPlaceDelay: 1
-  afterAIPlaceDelay: 1
-  resetOnePieceTime: 0.3
-  resetPieceDelay: 0.1
   goldCoins:
   - {fileID: 0}
   - {fileID: 0}
@@ -73,6 +69,11 @@ MonoBehaviour:
   - {fileID: 0}
   playerTrophyPos: {fileID: 0}
   aiTrophyPos: {fileID: 0}
+  coinOffsetPerCoin: {x: 0, y: 0, z: 0.8}
+  afterPlayerPlaceDelay: 1
+  afterAIPlaceDelay: 1
+  resetOnePieceTime: 0.3
+  resetPieceDelay: 0.1
   isPlayerTurn: 0
 --- !u!114 &7578144479734036277
 MonoBehaviour:
